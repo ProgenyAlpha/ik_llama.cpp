@@ -23830,9 +23830,11 @@ static int ggml_compute_forward(struct ggml_compute_params * params, struct ggml
             } break;
         case GGML_OP_CONT:
             {
-                if (i + 2 < cgraph->n_nodes &&
+                if (fusion && i + 2 < cgraph->n_nodes &&
                     cgraph->nodes[i+1]->op == GGML_OP_SUM_ROWS &&
-                    cgraph->nodes[i+2]->op == GGML_OP_TRANSPOSE) {
+                    cgraph->nodes[i+2]->op == GGML_OP_TRANSPOSE &&
+                    cgraph->nodes[i+1]->src[0] == tensor &&
+                    cgraph->nodes[i+2]->src[0] == cgraph->nodes[i+1]) {
                     if (tensor->src[0]->op == GGML_OP_TRANSPOSE) {
                         ggml_compute_forward_sum_rows_f32_nc(params, cgraph->nodes[i+1]);
                         i += 2;
